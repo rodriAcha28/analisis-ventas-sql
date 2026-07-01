@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080D1A;
+    --card: #0E1525;
+    --border: #1A2640;
+    --blue: #4F8EF7;
+    --green: #10B981;
+    --amber: #F59E0B;
+    --rose: #F472B6;
+    --text: #E2E8F0;
+    --sub: #64748B;
+    --muted: #1E2D4A;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.6; padding: 24px 20px 40px; min-width: 320px; }
+
+  /* HEADER */
+  .header { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .header-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 8px; }
+  .header-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; color: #fff; letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 8px; }
+  .header-sub { color: var(--sub); font-size: 13px; max-width: 560px; }
+  .header-meta { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
+  .meta-tag { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--sub); }
+
+  /* KPI CARDS */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 700px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; overflow: hidden; }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .kpi.blue::before { background: linear-gradient(90deg, var(--blue), transparent); }
+  .kpi.green::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .kpi.amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
+  .kpi.rose::before { background: linear-gradient(90deg, var(--rose), transparent); }
+  .kpi-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sub); margin-bottom: 6px; }
+  .kpi-value { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+  .kpi-value.blue { color: var(--blue); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.amber { color: var(--amber); }
+  .kpi-value.rose { color: var(--rose); }
+  .kpi-note { font-size: 11px; color: var(--sub); margin-top: 4px; }
+
+  /* CHARTS GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .card-full { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+  .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+  .card-sub { font-size: 11px; color: var(--sub); margin-bottom: 14px; }
+  .chart-wrap { position: relative; }
+
+  /* INSIGHTS */
+  .insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+  @media (max-width: 700px) { .insights-grid { grid-template-columns: 1fr; } }
+  .insight { background: var(--muted); border-radius: 8px; padding: 14px; border-left: 3px solid var(--blue); }
+  .insight.green { border-color: var(--green); }
+  .insight.amber { border-color: var(--amber); }
+  .insight-num { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: var(--blue); }
+  .insight.green .insight-num { color: var(--green); }
+  .insight.amber .insight-num { color: var(--amber); }
+  .insight-text { font-size: 12px; color: var(--sub); margin-top: 4px; line-height: 1.4; }
+
+  /* SECTION LABEL */
+  .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sub); margin: 22px 0 10px; }
+
+  /* TABLE */
+  .mini-table { width: 100%; border-collapse: collapse; }
+  .mini-table th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sub); padding: 0 0 8px; text-align: left; border-bottom: 1px solid var(--border); }
+  .mini-table td { font-size: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); color: var(--text); }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 20px; background: var(--muted); color: var(--blue); }
+  .num { font-family: 'Space Grotesk', sans-serif; font-weight: 500; }
+
+  /* FOOTER */
+  .footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 10px; }
+  .footer-left { font-size: 11px; color: var(--sub); }
+  .footer-right { font-size: 11px; color: var(--sub); }
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 5px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Análisis Exploratorio de Datos · SQL + PostgreSQL</div>
+  <div class="header-title">E-Commerce Retail UK<br>2009 — 2011</div>
+  <div class="header-sub">Análisis de 1M+ transacciones reales para identificar patrones de ventas, comportamiento de clientes y oportunidades de mercado internacional.</div>
+  <div class="header-meta">
+    <span class="meta-tag">PostgreSQL</span>
+    <span class="meta-tag">Online Retail II Dataset · UCI</span>
+    <span class="meta-tag">6 queries de negocio</span>
+    <span class="meta-tag">2 años de datos</span>
+  </div>
+</div>
+
+<div class="section-label">Métricas clave</div>
+<div class="kpi-row">
+  <div class="kpi blue">
+    <div class="kpi-label">Ingresos totales</div>
+    <div class="kpi-value blue">£20.8M</div>
+    <div class="kpi-note">2 años de operación</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">Clientes únicos</div>
+    <div class="kpi-value green">5,881</div>
+    <div class="kpi-note">72% son recurrentes</div>
+  </div>
+  <div class="kpi amber">
+    <div class="kpi-label">Países activos</div>
+    <div class="kpi-value amber">38</div>
+    <div class="kpi-note">Mercado principal: UK</div>
+  </div>
+  <div class="kpi rose">
+    <div class="kpi-label">Tasa devolución</div>
+    <div class="kpi-value rose">1.83%</div>
+    <div class="kpi-note">Muy baja vs industria</div>
+  </div>
+</div>
+
+<div class="section-label">Tendencia de ingresos mensuales</div>
+<div class="card-full">
+  <div class="card-title">Ingresos por mes · 2010–2011</div>
+  <div class="card-sub">Pico estacional consistente en Oct–Nov ambos años. Nov 2011: £1.5M (máximo histórico).</div>
+  <div class="chart-wrap"><canvas id="lineChart" height="90"></canvas></div>
+</div>
+
+<div class="grid-3">
+  <div class="card">
+    <div class="card-title">Top 10 Productos — Ingresos</div>
+    <div class="card-sub">WHITE HANGING HEART lidera en revenue (£266K) pese a no ser el más vendido en unidades.</div>
+    <div class="chart-wrap"><canvas id="barChart" height="200"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Segmentos de clientes</div>
+    <div class="card-sub">72.3% compra más de una vez. Alta fidelización.</div>
+    <div class="chart-wrap" style="max-width:220px; margin: 0 auto;"><canvas id="donutChart" height="180"></canvas></div>
+    <div style="margin-top:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#4F8EF7;display:inline-block;"></span><span style="font-size:11px;color:var(--sub);">Recurrente 2-5x — <strong style="color:var(--text)">41.7%</strong></span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#10B981;display:inline-block;"></span><span style="font-size:11px;color:var(--sub);">Frecuente 6x+ — <strong style="color:var(--text)">30.6%</strong></span></div>
+      <div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:2px;background:#1E2D4A;display:inline-block;"></span><span style="font-size:11px;color:var(--sub);">Única compra — <strong style="color:var(--text)">27.6%</strong></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Ingresos por país (exc. UK)</div>
+    <div class="card-sub">Irlanda lidera en volumen total. Países Bajos destaca por alto ticket promedio.</div>
+    <div class="chart-wrap"><canvas id="countryChart" height="180"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Gasto promedio por cliente</div>
+    <div class="card-sub">Irlanda duplica al resto: posibles distribuidores B2B con alto valor por cliente.</div>
+    <div class="chart-wrap"><canvas id="avgChart" height="180"></canvas></div>
+  </div>
+</div>
+
+<div class="section-label">Hallazgos de negocio</div>
+<div class="insights-grid">
+  <div class="insight">
+    <div class="insight-num">Nov pico</div>
+    <div class="insight-text">Octubre–Noviembre concentra el 25–30% de ingresos anuales. La operación debe anticipar inventario y logística en Q4.</div>
+  </div>
+  <div class="insight green">
+    <div class="insight-num">72.3%</div>
+    <div class="insight-text">de clientes repite compra. Tasa altísima para e-commerce, sugiere base B2B o clientes muy fidelizados.</div>
+  </div>
+  <div class="insight amber">
+    <div class="insight-num">£124K</div>
+    <div class="insight-text">gasto promedio por cliente en Irlanda vs £4K en Alemania. Segmentación B2B/B2C imprescindible para análisis precisos.</div>
+  </div>
+</div>
+
+<div class="section-label" style="margin-top:22px">Top productos por ingresos totales</div>
+<div class="card-full">
+  <table class="mini-table">
+    <thead><tr><th>#</th><th>Producto</th><th>Unidades</th><th>Ingresos</th><th>Perfil</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>WHITE HANGING HEART T-LIGHT HOLDER</td><td class="num">96,688</td><td class="num" style="color:var(--green)">£266,923</td><td><span class="badge">Alto margen</span></td></tr>
+      <tr><td class="num">2</td><td>PAPER CRAFT, LITTLE BIRDIE</td><td class="num">80,995</td><td class="num" style="color:var(--green)">£168,469</td><td><span class="badge">Alto margen</span></td></tr>
+      <tr><td class="num">3</td><td>JUMBO BAG RED RETROSPOT</td><td class="num">79,285</td><td class="num" style="color:var(--blue)">£150,935</td><td><span class="badge">Volumen</span></td></tr>
+      <tr><td class="num">4</td><td>ASSORTED COLOUR BIRD ORNAMENT</td><td class="num">81,817</td><td class="num" style="color:var(--blue)">£132,187</td><td><span class="badge">Volumen</span></td></tr>
+      <tr><td class="num">5</td><td>WORLD WAR 2 GLIDERS ASSTD DESIGNS</td><td class="num">110,249</td><td class="num" style="color:var(--sub)">£25,259</td><td><span class="badge" style="color:var(--sub)">Bajo margen</span></td></tr>
+    </tbody>
+  </table>
+  <div style="margin-top:12px; font-size:11px; color:var(--sub);">⚠ El producto más vendido en unidades (GLIDERS, 110K) genera solo £25K — 10x menos que el líder en ingresos. Optimizar por unidades puede priorizar los productos menos rentables.</div>
+</div>
+
+<div class="footer">
+  <div class="footer-left"><span class="dot"></span>Datos reales · Online Retail II Dataset · UCI Machine Learning Repository</div>
+  <div class="footer-right">Portafolio · Análisis SQL · PostgreSQL</div>
+</div>
+
+<script>
+const chartDefaults = {
+  color: '#64748B',
+  font: { family: 'Inter', size: 11 }
+};
+Chart.defaults.color = chartDefaults.color;
+Chart.defaults.font = chartDefaults.font;
+
+// LINE CHART
+const lineCtx = document.getElementById('lineChart').getContext('2d');
+const months2010 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const months2011 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const labels = months2010.map(m => m+' 2010').concat(months2011.map(m => m+' 2011'));
+const data2010 = [652708.50,553713.30,833570.13,627934.63,659858.86,752270.14,606681.15,697274.91,924333.01,1126558.04,1470272.48,1262598.79];
+const data2011 = [691364.56,523631.89,717639.36,537808.62,770536.02,761739.90,719221.19,737014.26,1058590.17,1154979.30,1509496.33,638810.68];
+const allData = [...data2010, ...data2011];
+
+const gradient = lineCtx.createLinearGradient(0, 0, 0, 200);
+gradient.addColorStop(0, 'rgba(79,142,247,0.25)');
+gradient.addColorStop(1, 'rgba(79,142,247,0)');
+
+new Chart(lineCtx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [{
+      data: allData,
+      borderColor: '#4F8EF7',
+      backgroundColor: gradient,
+      borderWidth: 2,
+      pointRadius: 2.5,
+      pointBackgroundColor: '#4F8EF7',
+      tension: 0.4,
+      fill: true
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1A2640' }, ticks: { maxRotation: 45, font: { size: 10 } } },
+      y: { grid: { color: '#1A2640' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } }
+    }
+  }
+});
+
+// HORIZONTAL BAR — Products by revenue
+const barCtx = document.getElementById('barChart').getContext('2d');
+const products = ['WHITE HANGING HEART','PAPER CRAFT BIRDIE','JUMBO BAG RED','BIRD ORNAMENT','MEDIUM STORAGE JAR','SMALL POPCORN HOLDER','60 FAIRY CAKE CASES','PINK PAISLEY CASES','BROCADE RING PURSE','WORLD WAR 2 GLIDERS'];
+const revenues = [266923,168469,150935,132187,81700,44090,27404,28490,14959,25259];
+new Chart(barCtx, {
+  type: 'bar',
+  data: {
+    labels: products,
+    datasets: [{ data: revenues, backgroundColor: '#4F8EF7', borderRadius: 4, borderSkipped: false }]
+  },
+  options: {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#1A2640' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } },
+      y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// DONUT — Customer segments
+const donutCtx = document.getElementById('donutChart').getContext('2d');
+new Chart(donutCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Recurrente 2-5x','Frecuente 6x+','Única compra'],
+    datasets: [{ data: [41.7,30.6,27.6], backgroundColor: ['#4F8EF7','#10B981','#1E2D4A'], borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: {
+    cutout: '65%',
+    plugins: { legend: { display: false } }
+  }
+});
+
+// BAR — Country revenue
+const countryCtx = document.getElementById('countryChart').getContext('2d');
+new Chart(countryCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Irlanda','Holanda','Alemania','Francia','Australia','España','Suiza','Suecia','Dinamarca','Bélgica'],
+    datasets: [{ data: [664431,554232,431262,356944,169968,109178,101011,91903,69862,65753], backgroundColor: '#10B981', borderRadius: 4, borderSkipped: false }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } },
+      y: { grid: { color: '#1A2640' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } }
+    }
+  }
+});
+
+// BAR — Avg spend by customer
+const avgCtx = document.getElementById('avgChart').getContext('2d');
+new Chart(avgCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Irlanda','Holanda','Australia','Dinamarca','Suecia','Japón','Noruega','Suiza','Alemania','Grecia'],
+    datasets: [{ data: [124326,25192,11331,5821,4818,4713,4623,4562,4030,3819], backgroundColor: '#F59E0B', borderRadius: 4, borderSkipped: false }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } },
+      y: { grid: { color: '#1A2640' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
