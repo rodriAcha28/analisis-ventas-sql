@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Retail UK · Análisis SQL</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F8F9FC;
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --green: #059669;
+    --green-light: #ECFDF5;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --rose: #DB2777;
+    --rose-light: #FDF2F8;
+    --text: #0F172A;
+    --sub: #64748B;
+    --muted: #F1F5F9;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.6; padding: 32px 28px 48px; max-width: 1100px; margin: 0 auto; }
+
+  .header { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+  .header-title { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 10px; }
+  .header-sub { color: var(--sub); font-size: 14px; max-width: 600px; line-height: 1.6; }
+  .header-meta { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .meta-tag { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--sub); background: var(--card); }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  @media (max-width: 700px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
+  .kpi-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sub); margin-bottom: 8px; }
+  .kpi-value { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+  .kpi-value.blue { color: var(--blue); }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.amber { color: var(--amber); }
+  .kpi-value.rose { color: var(--rose); }
+  .kpi-note { font-size: 11px; color: var(--sub); margin-top: 4px; }
+  .kpi-icon { font-size: 18px; margin-bottom: 8px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+  .card-full { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .card-sub { font-size: 12px; color: var(--sub); margin-bottom: 16px; line-height: 1.4; }
+
+  .insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  @media (max-width: 700px) { .insights-grid { grid-template-columns: 1fr; } }
+  .insight { border-radius: 10px; padding: 16px; border: 1px solid; }
+  .insight.blue { background: var(--blue-light); border-color: #BFDBFE; }
+  .insight.green { background: var(--green-light); border-color: #A7F3D0; }
+  .insight.amber { background: var(--amber-light); border-color: #FDE68A; }
+  .insight-num { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+  .insight.blue .insight-num { color: var(--blue); }
+  .insight.green .insight-num { color: var(--green); }
+  .insight.amber .insight-num { color: var(--amber); }
+  .insight-text { font-size: 12px; color: var(--sub); margin-top: 5px; line-height: 1.4; }
+
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sub); margin: 28px 0 12px; }
+
+  .mini-table { width: 100%; border-collapse: collapse; }
+  .mini-table th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sub); padding: 0 12px 10px 0; text-align: left; border-bottom: 1px solid var(--border); }
+  .mini-table td { font-size: 12px; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); color: var(--text); }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+  .badge.high { background: var(--green-light); color: var(--green); }
+  .badge.mid { background: var(--blue-light); color: var(--blue); }
+  .badge.low { background: var(--muted); color: var(--sub); }
+  .num { font-family: 'Space Grotesk', sans-serif; font-weight: 500; }
+
+  .warning-box { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #92400E; margin-top: 14px; line-height: 1.5; }
+
+  .footer { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .footer-left, .footer-right { font-size: 11px; color: var(--sub); }
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 5px; }
+
+  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Análisis Exploratorio de Datos · SQL + PostgreSQL</div>
+  <div class="header-title">E-Commerce Retail UK<br>2009 — 2011</div>
+  <div class="header-sub">Análisis de más de 1 millón de transacciones reales para identificar patrones de ventas, comportamiento de clientes y oportunidades de mercado internacional.</div>
+  <div class="header-meta">
+    <span class="meta-tag">PostgreSQL</span>
+    <span class="meta-tag">Online Retail II · UCI</span>
+    <span class="meta-tag">6 queries de negocio</span>
+    <span class="meta-tag">2 años de datos</span>
+  </div>
+</div>
+
+<div class="section-label">Métricas clave</div>
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="kpi-label">Ingresos totales</div>
+    <div class="kpi-value blue">£20.8M</div>
+    <div class="kpi-note">2 años de operación</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Clientes únicos</div>
+    <div class="kpi-value green">5,881</div>
+    <div class="kpi-note">72% son recurrentes</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Países activos</div>
+    <div class="kpi-value amber">38</div>
+    <div class="kpi-note">Mercado principal: UK</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Tasa devolución</div>
+    <div class="kpi-value rose">1.83%</div>
+    <div class="kpi-note">Muy baja vs industria</div>
+  </div>
+</div>
+
+<div class="section-label">Tendencia de ingresos mensuales</div>
+<div class="card-full">
+  <div class="card-title">Ingresos por mes · 2010–2011</div>
+  <div class="card-sub">Pico estacional consistente en Oct–Nov ambos años. Noviembre 2011 fue el mes de mayor ingreso con £1.5M.</div>
+  <canvas id="lineChart" height="80"></canvas>
+</div>
+
+<div class="grid-3">
+  <div class="card">
+    <div class="card-title">Top 10 Productos — Ingresos totales</div>
+    <div class="card-sub">WHITE HANGING HEART lidera en revenue (£266K) pese a no tener el mayor volumen de unidades.</div>
+    <canvas id="barChart" height="200"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-title">Segmentos de clientes</div>
+    <div class="card-sub">72.3% de clientes compra más de una vez. Alta fidelización.</div>
+    <div style="max-width:200px; margin: 0 auto 14px;"><canvas id="donutChart" height="170"></canvas></div>
+    <div>
+      <div class="legend-row"><span class="legend-dot" style="background:#2563EB"></span><span style="font-size:11px;color:var(--sub)">Recurrente 2–5x &nbsp;<strong style="color:var(--text)">41.7%</strong></span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:#059669"></span><span style="font-size:11px;color:var(--sub)">Frecuente 6x+ &nbsp;<strong style="color:var(--text)">30.6%</strong></span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:#E2E8F0"></span><span style="font-size:11px;color:var(--sub)">Única compra &nbsp;<strong style="color:var(--text)">27.6%</strong></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Ingresos por país (exc. UK)</div>
+    <div class="card-sub">Irlanda lidera en volumen total. Países Bajos destaca por alto ticket promedio.</div>
+    <canvas id="countryChart" height="190"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-title">Gasto promedio por cliente</div>
+    <div class="card-sub">Irlanda duplica al resto: posibles distribuidores B2B con alto valor por cliente.</div>
+    <canvas id="avgChart" height="190"></canvas>
+  </div>
+</div>
+
+<div class="section-label">Hallazgos de negocio</div>
+<div class="insights-grid">
+  <div class="insight blue">
+    <div class="insight-num">Nov = pico</div>
+    <div class="insight-text">Oct–Nov concentra el 25–30% de ingresos anuales. La operación debe anticipar inventario y logística en Q4.</div>
+  </div>
+  <div class="insight green">
+    <div class="insight-num">72.3%</div>
+    <div class="insight-text">de clientes repite compra. Tasa altísima para e-commerce, sugiere base B2B o clientes muy fidelizados.</div>
+  </div>
+  <div class="insight amber">
+    <div class="insight-num">£124K</div>
+    <div class="insight-text">gasto promedio por cliente en Irlanda vs £4K en Alemania. Segmentación B2B/B2C imprescindible para análisis precisos.</div>
+  </div>
+</div>
+
+<div class="section-label">Top 5 productos — detalle</div>
+<div class="card-full">
+  <table class="mini-table">
+    <thead>
+      <tr><th>#</th><th>Producto</th><th>Unidades</th><th>Ingresos</th><th>Perfil</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="num">1</td><td>WHITE HANGING HEART T-LIGHT HOLDER</td><td class="num">96,688</td><td class="num" style="color:var(--green)">£266,923</td><td><span class="badge high">Alto margen</span></td></tr>
+      <tr><td class="num">2</td><td>PAPER CRAFT, LITTLE BIRDIE</td><td class="num">80,995</td><td class="num" style="color:var(--green)">£168,469</td><td><span class="badge high">Alto margen</span></td></tr>
+      <tr><td class="num">3</td><td>JUMBO BAG RED RETROSPOT</td><td class="num">79,285</td><td class="num" style="color:var(--blue)">£150,935</td><td><span class="badge mid">Volumen</span></td></tr>
+      <tr><td class="num">4</td><td>ASSORTED COLOUR BIRD ORNAMENT</td><td class="num">81,817</td><td class="num" style="color:var(--blue)">£132,187</td><td><span class="badge mid">Volumen</span></td></tr>
+      <tr><td class="num">5</td><td>WORLD WAR 2 GLIDERS ASSTD DESIGNS</td><td class="num">110,249</td><td class="num" style="color:var(--sub)">£25,259</td><td><span class="badge low">Bajo margen</span></td></tr>
+    </tbody>
+  </table>
+  <div class="warning-box">⚠ El producto más vendido en unidades (GLIDERS, 110K) genera solo £25K — 10x menos que el líder en ingresos. Optimizar por unidades puede priorizar los productos menos rentables.</div>
+</div>
+
+<div class="footer">
+  <div class="footer-left"><span class="dot"></span>Datos reales · Online Retail II Dataset · UCI Machine Learning Repository</div>
+  <div class="footer-right">Portafolio · Análisis SQL · PostgreSQL</div>
+</div>
+
+<script>
+Chart.defaults.color = '#64748B';
+Chart.defaults.font = { family: 'Inter', size: 11 };
+
+// LINE CHART
+const lineCtx = document.getElementById('lineChart').getContext('2d');
+const labels2010 = ['Ene 10','Feb 10','Mar 10','Abr 10','May 10','Jun 10','Jul 10','Ago 10','Sep 10','Oct 10','Nov 10','Dic 10'];
+const labels2011 = ['Ene 11','Feb 11','Mar 11','Abr 11','May 11','Jun 11','Jul 11','Ago 11','Sep 11','Oct 11','Nov 11','Dic 11'];
+const allLabels = [...labels2010, ...labels2011];
+const allData = [652708,553713,833570,627934,659858,752270,606681,697274,924333,1126558,1470272,1262598,691364,523631,717639,537808,770536,761739,719221,737014,1058590,1154979,1509496,638810];
+const grad = lineCtx.createLinearGradient(0, 0, 0, 250);
+grad.addColorStop(0, 'rgba(37,99,235,0.15)');
+grad.addColorStop(1, 'rgba(37,99,235,0)');
+new Chart(lineCtx, {
+  type: 'line',
+  data: { labels: allLabels, datasets: [{ data: allData, borderColor: '#2563EB', backgroundColor: grad, borderWidth: 2, pointRadius: 2.5, pointBackgroundColor: '#2563EB', tension: 0.4, fill: true }] },
+  options: { plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#F1F5F9' }, ticks: { maxRotation: 45, font: { size: 10 } } }, y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } } } }
+});
+
+// HORIZONTAL BAR — Products
+const barCtx = document.getElementById('barChart').getContext('2d');
+new Chart(barCtx, {
+  type: 'bar',
+  data: {
+    labels: ['WHITE HANGING HEART','PAPER CRAFT BIRDIE','JUMBO BAG RED','BIRD ORNAMENT','MEDIUM STORAGE JAR','SMALL POPCORN HOLDER','60 FAIRY CAKE CASES','PINK PAISLEY CASES','BROCADE RING PURSE','WORLD WAR 2 GLIDERS'],
+    datasets: [{ data: [266923,168469,150935,132187,81700,44090,27404,28490,14959,25259], backgroundColor: '#2563EB', borderRadius: 4, borderSkipped: false }]
+  },
+  options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#F1F5F9' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } }, y: { grid: { display: false }, ticks: { font: { size: 10 } } } } }
+});
+
+// DONUT
+const donutCtx = document.getElementById('donutChart').getContext('2d');
+new Chart(donutCtx, {
+  type: 'doughnut',
+  data: { labels: ['Recurrente','Frecuente','Única'], datasets: [{ data: [41.7,30.6,27.6], backgroundColor: ['#2563EB','#059669','#E2E8F0'], borderWidth: 0, hoverOffset: 6 }] },
+  options: { cutout: '65%', plugins: { legend: { display: false } } }
+});
+
+// COUNTRY BAR
+const countryCtx = document.getElementById('countryChart').getContext('2d');
+new Chart(countryCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Irlanda','Holanda','Alemania','Francia','Australia','España','Suiza','Suecia','Dinamarca','Bélgica'],
+    datasets: [{ data: [664431,554232,431262,356944,169968,109178,101011,91903,69862,65753], backgroundColor: '#059669', borderRadius: 4, borderSkipped: false }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } }, y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } } } }
+});
+
+// AVG SPEND
+const avgCtx = document.getElementById('avgChart').getContext('2d');
+new Chart(avgCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Irlanda','Holanda','Australia','Dinamarca','Suecia','Japón','Noruega','Suiza','Alemania','Grecia'],
+    datasets: [{ data: [124326,25192,11331,5821,4818,4713,4623,4562,4030,3819], backgroundColor: '#D97706', borderRadius: 4, borderSkipped: false }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } }, y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => '£'+Math.round(v/1000)+'K' } } } }
+});
+</script>
+</body>
+</html>
