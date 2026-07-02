@@ -1,12 +1,10 @@
-# 🛍️ Análisis de Ventas E-Commerce UK · SQL + PostgreSQL
+## Análisis de Ventas E-Commerce UK · SQL + PostgreSQL
 
 Análisis exploratorio de más de **1 millón de transacciones reales** de un e-commerce del Reino Unido (2009–2011), con el objetivo de identificar patrones de ventas, comportamiento de clientes y oportunidades de mercado internacional.
 
----
 
-## 🗂️ Estructura del repositorio
+## Estructura del repositorio
 
-```
 analisis-ventas-sql/
 │
 ├── queries/
@@ -23,7 +21,7 @@ analisis-ventas-sql/
 
 ---
 
-## 🛠️ Herramientas utilizadas
+## Herramientas utilizadas
 
 | Herramienta | Uso |
 |---|---|
@@ -33,7 +31,7 @@ analisis-ventas-sql/
 
 ---
 
-## 📦 Dataset
+## Dataset
 
 **Online Retail II** · UCI Machine Learning Repository  
 - Período: Diciembre 2009 – Diciembre 2011  
@@ -55,37 +53,37 @@ analisis-ventas-sql/
 
 ---
 
-## ❓ Preguntas de negocio respondidas
+## Preguntas de negocio respondidas
 
-### Q1 · ¿Cuáles son los 10 productos más vendidos?
+### 1 · ¿Cuáles son los 10 productos más vendidos?
 
 **Hallazgo:** El producto más vendido en unidades (WORLD WAR 2 GLIDERS, 110K unidades) genera solo £25K en ingresos — 10 veces menos que el líder en revenue (WHITE HANGING HEART, £266K). Optimizar solo por volumen puede priorizar los productos menos rentables.
 
-### Q2 · ¿Qué meses generan más ingresos?
+### 2 · ¿Qué meses generan más ingresos?
 
 **Hallazgo:** Existe estacionalidad clara y consistente: octubre–noviembre concentra el 25–30% de ingresos anuales en ambos años. Noviembre 2011 fue el mes pico con £1.5M. Diciembre 2011 muestra una caída aparente que se explica por el corte del dataset a mediados de mes, no por una baja real en ventas.
 
-### Q3 · ¿Qué mercados internacionales generan más ingresos?
+### 3 · ¿Qué mercados internacionales generan más ingresos?
 
 **Hallazgo:** Irlanda lidera en ingresos totales (£664K) pero Países Bajos genera £554K con solo 229 órdenes vs 626 de Irlanda. Esto indica un ticket promedio mucho más alto en Países Bajos, posiblemente por clientes mayoristas.
 
-### Q4 · ¿Cuántos clientes son recurrentes vs únicos?
+### 4 · ¿Cuántos clientes son recurrentes vs únicos?
 
 **Hallazgo:** El 72.3% de los clientes compra más de una vez (41.7% recurrente + 30.6% frecuente). Solo el 27.6% es de única compra — tasa de retención muy alta para e-commerce, consistente con una base de clientes B2B o distribuidores.
 
-### Q5 · ¿Qué tasa de devoluciones tiene el negocio?
+### 5 · ¿Qué tasa de devoluciones tiene el negocio?
 
 **Hallazgo:** Solo el 1.83% de los registros son cancelaciones, muy por debajo del promedio del sector retail (20–30%). Esto refuerza la hipótesis de una base de clientes B2B con compras más planificadas y menos impulsivas.
 
-### Q6 · ¿Cuánto gasta en promedio un cliente por país?
+### 6 · ¿Cuánto gasta en promedio un cliente por país?
 
 **Hallazgo:** El gasto promedio por cliente en Irlanda (£124K) es 30 veces mayor que en Alemania (£4K). Esta diferencia extrema confirma la presencia de distribuidores mayoristas que distorsionan los promedios. Segmentar B2B de B2C sería el análisis siguiente natural.
 
 ---
 
-## 💡 Conclusiones generales
+## Conclusiones generales
 
-1. **Estacionalidad marcada:** Q4 (especialmente noviembre) es crítico para la operación. La planificación de inventario y logística debería orientarse hacia ese período.
+1. **Estacionalidad marcada:** Respuesta 4 (especialmente noviembre) es crítico para la operación. La planificación de inventario y logística debería orientarse hacia ese período.
 
 2. **Alta fidelización:** Con 72% de clientes recurrentes, el negocio tiene una base sólida. El foco debería estar en retención, no en adquisición masiva.
 
@@ -95,7 +93,7 @@ analisis-ventas-sql/
 
 ---
 
-## ⚙️ Cómo reproducir el análisis
+## Cómo reproducir el análisis
 
 1. Descargar el dataset: https://archive.ics.uci.edu/dataset/502/online+retail+ii
 2. Convertir el archivo `.xlsx` a `.csv`
@@ -105,7 +103,7 @@ analisis-ventas-sql/
 
 ---
 
-## 🧠 Próximos pasos
+## Próximos pasos
 
 - Separar clientes B2B de B2C usando umbrales de gasto y frecuencia
 - Análisis RFM (Recency, Frequency, Monetary) para segmentación avanzada
