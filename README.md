@@ -2,9 +2,10 @@
 
 Análisis exploratorio de más de **1 millón de transacciones reales** de un e-commerce del Reino Unido (2009–2011), con el objetivo de identificar patrones de ventas, comportamiento de clientes y oportunidades de mercado internacional.
 
+---
 
 ## Estructura del repositorio
-
+```
 analisis-ventas-sql/
 │
 ├── queries/
